@@ -8,17 +8,27 @@ export function useInView(options?: IntersectionObserverInit) {
     const el = ref.current;
     if (!el) return;
 
+    //  Fallback for older / buggy mobile browsers
+    if (!('IntersectionObserver' in window)) {
+      setIsInView(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsInView(true);
-          observer.unobserve(el);
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -60px 0px', ...options }
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px 0px 0px', // FIXED (important)
+        ...options,
+      }
     );
 
     observer.observe(el);
+
     return () => observer.disconnect();
   }, [options]);
 
